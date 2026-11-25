@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS MOBILE — Мега-каталог из 20 смартфонов</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #eef2ff 0%, #dbeafe 45%, #f3e8ff 100%);
+            --blob-1: rgba(99, 102, 241, 0.35);
+            --blob-2: rgba(14, 165, 233, 0.35);
+            --blob-3: rgba(236, 72, 153, 0.28);
+            --blob-4: rgba(16, 185, 129, 0.25);
+            --particle-color: rgba(30, 41, 59, 0.16);
+            --card-bg: rgba(255, 255, 255, 0.74);
+            --card-border: rgba(255, 255, 255, 0.88);
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --accent: #2563eb;
+            --accent-2: #7c3aed;
+            --accent-hover: #1d4ed8;
+            --modal-bg: rgba(255, 255, 255, 0.96);
+            --header-bg: rgba(255, 255, 255, 0.8);
+            --shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+            --soft-surface: rgba(15, 23, 42, 0.045);
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #050816 0%, #0f172a 50%, #1e1b4b 100%);
+            --blob-1: rgba(124, 58, 237, 0.35);
+            --blob-2: rgba(37, 99, 235, 0.32);
+            --blob-3: rgba(219, 39, 119, 0.24);
+            --blob-4: rgba(6, 182, 212, 0.22);
+            --particle-color: rgba(226, 232, 240, 0.18);
+            --card-bg: rgba(15, 23, 42, 0.74);
+            --card-border: rgba(255, 255, 255, 0.11);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #60a5fa;
+            --accent-2: #a78bfa;
+            --accent-hover: #3b82f6;
+            --modal-bg: rgba(15, 23, 42, 0.97);
+            --header-bg: rgba(9, 13, 26, 0.84);
+            --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+            --soft-surface: rgba(255, 255, 255, 0.055);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.5s ease, color 0.35s ease;
+        }
+
+        /* Живой фон: градиентные сферы + canvas частиц */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        #particlesCanvas {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(95px);
+            animation: drift 20s infinite alternate ease-in-out;
+        }
+
+        .blob-1 { width: 540px; height: 540px; background: var(--blob-1); top: -120px; left: -120px; }
+        .blob-2 { width: 620px; height: 620px; background: var(--blob-2); top: 24%; right: -160px; animation-duration: 24s; animation-delay: -4s; }
+        .blob-3 { width: 500px; height: 500px; background: var(--blob-3); bottom: 16%; left: 8%; animation-duration: 22s; animation-delay: -9s; }
+        .blob-4 { width: 450px; height: 450px; background: var(--blob-4); bottom: -100px; right: 18%; animation-duration: 19s; animation-delay: -13s; }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(65px, -45px) scale(1.12) rotate(8deg); }
+            100% { transform: translate(-50px, 70px) scale(0.94) rotate(-8deg); }
+        }
+
+        /* Навигация и шапка */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--card-border);
+            padding: 0.9rem 4%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.8px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2), #ec4899);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shineText 6s linear infinite;
+            text-decoration: none;
+        }
+
+        @keyframes shineText {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        nav {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            position: relative;
+            padding: 4px 0;
+            transition: color 0.25s ease;
+        }
+
+        nav a:hover {
+            color: var(--text-main);
+        }
+
+        nav a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+        }
+
+        .lang-switcher {
+            display: flex;
+            background: var(--soft-surface);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 3px;
+        }
+
+        .lang-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            padding: 6px 11px;
+            border-radius: 9px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        .icon-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            height: 38px;
+            padding: 0 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .icon-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .cart-badge {
+            background: linear-gradient(135deg, #ec4899, var(--accent-2));
+            color: #fff;
+            font-size: 0.75rem;
+            padding: 2px 7px;
+            border-radius: 99px;
+        }
+
+        /* Контейнер секций */
+        .container {
+            max-width: 1420px;
+            margin: 0 auto;
+            padding: 0 4%;
+        }
+
+        section {
+            padding: 5rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 820px;
+            margin: 0 auto 3rem;
+        }
+
+        .section-tag {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 99px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            background: var(--soft-surface);
+            border: 1px solid var(--card-border);
+            color: var(--accent);
+            margin-bottom: 0.9rem;
+        }
+
+        .section-header h2 {
+            font-size: clamp(1.9rem, 4vw, 3rem);
+            font-weight: 900;
+            margin-bottom: 0.85rem;
+            letter-spacing: -0.6px;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.06rem;
+            line-height: 1.7;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 5.5rem 0 4rem;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5.4vw, 4.3rem);
+            font-weight: 900;
+            line-height: 1.07;
+            letter-spacing: -1.5px;
+            margin-bottom: 1.35rem;
+            animation: slideUp 0.8s ease forwards;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(90deg, var(--accent), var(--accent-2), #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.14rem;
+            color: var(--text-muted);
+            line-height: 1.72;
+            margin-bottom: 2rem;
+            animation: slideUp 1s ease forwards;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.6rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            border: none;
+            padding: 0.95rem 1.85rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 0.98rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.3);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 30px rgba(37, 99, 235, 0.42);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+            padding: 0.95rem 1.65rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 0.98rem;
+            cursor: pointer;
+            text-decoration: none;
+            backdrop-filter: blur(12px);
+            transition: transform 0.25s ease, background 0.25s ease;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(14px);
+            padding: 1.15rem;
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-num {
+            font-size: 1.65rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .hero-showcase {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 410px;
+        }
+
+        .floating-phone {
+            width: 210px;
+            height: 415px;
+            border-radius: 38px;
+            border: 6px solid #1e293b;
+            background: linear-gradient(155deg, #2563eb, #7c3aed, #ec4899);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35), 0 0 45px rgba(124, 58, 237, 0.35);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: #fff;
+            animation: floatHero 5s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        @keyframes floatHero {
+            0%, 100% { transform: translateY(0px) rotate(-3deg); }
+            50% { transform: translateY(-18px) rotate(3deg); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Фильтры и поиск */
+        .toolbar {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            border-radius: 22px;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 2.4rem;
+            box-shadow: var(--shadow);
+        }
+
+        .filter-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .pill-btn {
+            border: 1px solid var(--card-border);
+            background: var(--soft-surface);
+            color: var(--text-main);
+            padding: 0.58rem 1.15rem;
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .pill-btn:hover, .pill-btn.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        .search-sort {
+            display: flex;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+        }
+
+        .input-glass {
+            background: var(--soft-surface);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 0.72rem 1.05rem;
+            border-radius: 14px;
+            font-size: 0.92rem;
+            outline: none;
+            min-width: 220px;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .input-glass:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+        }
+
+        .input-glass option {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+        /* Каталог */
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.75rem;
+        }
+
+        .phone-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            border-radius: 26px;
+            padding: 1.4rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(28px);
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, opacity 0.5s ease;
+        }
+
+        .phone-card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .phone-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            padding: 4px 11px;
+            border-radius: 99px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            z-index: 2;
+        }
+
+        .device-stage {
+            height: 195px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .phone-device {
+            width: 98px;
+            height: 192px;
+            border-radius: 20px;
+            border: 4px solid #1e293b;
+            padding: 9px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 14px 26px rgba(0, 0, 0, 0.28);
+            transition: transform 0.35s ease;
+        }
+
+        .phone-card:hover .phone-device {
+            transform: scale(1.08) rotate(-2deg);
+        }
+
+        .island {
+            width: 34px;
+            height: 8px;
+            background: #0f172a;
+            border-radius: 99px;
+            margin: 0 auto;
+        }
+
+        .device-label {
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-align: center;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+        }
+
+        .home-bar {
+            width: 34px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.75);
+            border-radius: 99px;
+            margin: 0 auto;
+        }
+
+        .card-brand {
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin-bottom: 0.25rem;
+        }
+
+        .card-title {
+            font-size: 1.22rem;
+            font-weight: 800;
+            margin-bottom: 0.45rem;
+            cursor: pointer;
+        }
+
+        .card-desc {
+            font-size: 0.87rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .mini-specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .mini-tag {
+            font-size: 0.73rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 8px;
+            background: var(--soft-surface);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+        }
+
+        .card-bottom {
+            border-top: 1px solid var(--card-border);
+            padding-top: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .price-tag {
+            font-size: 1.18rem;
+            font-weight: 900;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.45rem;
+        }
+
+        .btn-sm {
+            border: none;
+            border-radius: 11px;
+            padding: 0.5rem 0.78rem;
+            font-size: 0.79rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .btn-sm:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-info {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-compare-sm {
+            background: var(--soft-surface);
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+        }
+
+        /* Блок сравнения */
+        .compare-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(18px);
+            border-radius: 28px;
+            padding: 2.2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .compare-selectors {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .vs-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            color: #fff;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .compare-table-wrap {
+            overflow-x: auto;
+        }
+
+        table.spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        table.spec-table th,
+        table.spec-table td {
+            padding: 1rem 1.1rem;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 0.94rem;
+        }
+
+        table.spec-table th {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            width: 24%;
+        }
+
+        /* Технологии / Преимущества */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.6rem;
+        }
+
+        .tech-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(14px);
+            border-radius: 24px;
+            padding: 1.9rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-6px);
+        }
+
+        .tech-icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .tech-card h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 0.55rem;
+        }
+
+        .tech-card p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.65;
+        }
+
+        /* FAQ */
+        .faq-list {
+            max-width: 920px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.95rem;
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(14px);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .faq-q {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            padding: 1.2rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .faq-a {
+            max-height: 0;
+            overflow: hidden;
+            padding: 0 1.5rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+            font-size: 0.94rem;
+            transition: max-height 0.35s ease, padding 0.35s ease;
+        }
+
+        .faq-item.open .faq-a {
+            max-height: 240px;
+            padding: 0 1.5rem 1.25rem;
+        }
+
+        /* Контактная форма в конце */
+        .contact-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(18px);
+            border-radius: 30px;
+            padding: 2.6rem;
+            box-shadow: var(--shadow);
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            text-align: left;
+        }
+
+        .field-group label {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .field-input {
+            width: 100%;
+            background: var(--soft-surface);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 0.85rem 1.05rem;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .field-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+        }
+
+        textarea.field-input {
+            min-height: 110px;
+            resize: vertical;
+            margin-bottom: 1.4rem;
+        }
+
+        .contact-footer-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .submitted-preview {
+            margin-top: 1.5rem;
+            padding: 1.1rem 1.3rem;
+            border-radius: 16px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            display: none;
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .submitted-preview.show {
+            display: block;
+        }
+
+        /* Модальные окна (Детали и Корзина) */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.72);
+            backdrop-filter: blur(8px);
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--modal-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            max-width: 880px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2.2rem;
+            position: relative;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+            animation: popIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.92) translateY(16px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--card-border);
+            background: var(--soft-surface);
+            color: var(--text-main);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .modal-detail-grid {
+            display: grid;
+            grid-template-columns: 0.85fr 1.15fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .spec-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.85rem;
+            margin: 1.2rem 0;
+        }
+
+        .spec-box {
+            background: var(--soft-surface);
+            border: 1px solid var(--card-border);
+            padding: 0.85rem;
+            border-radius: 14px;
+        }
+
+        .spec-box small {
+            display: block;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .spec-box strong {
+            font-size: 0.92rem;
+        }
+
+        .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.9rem 1rem;
+            border-radius: 14px;
+            background: var(--soft-surface);
+            border: 1px solid var(--card-border);
+            margin-bottom: 0.7rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 900;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            padding: 0.9rem 1.4rem;
+            border-radius: 14px;
+            font-weight: 700;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.35s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        footer {
+            border-top: 1px solid var(--card-border);
+            background: var(--header-bg);
+            backdrop-filter: blur(16px);
+            padding: 2.6rem 4%;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+        }
+
+        @media (max-width: 980px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .contact-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; text-align: center; }
+            .hero-btns, .stats-row { justify-content: center; }
+            .modal-detail-grid { grid-template-columns: 1fr; }
+            .compare-selectors { grid-template-columns: 1fr; }
+            nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Анимированный фон -->
+    <div class="bg-layer">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        <div class="blob blob-4"></div>
+    </div>
+    <canvas id="particlesCanvas"></canvas>
+
+    <!-- Шапка -->
+    <header>
+        <a href="#top" class="logo">NEXUS MOBILE</a>
+        <nav>
+            <a href="#catalog" id="navCatalog">Каталог (20)</a>
+            <a href="#compare" id="navCompare">Сравнение</a>
+            <a href="#technologies" id="navTech">Технологии</a>
+            <a href="#faq" id="navFaq">FAQ</a>
+            <a href="#contact" id="navContact">Контакты</a>
+        </nav>
+        <div class="header-actions">
+            <div class="lang-switcher">
+                <button class="lang-btn active" data-lang="ru" onclick="setLang('ru')">RU</button>
+                <button class="lang-btn" data-lang="uz" onclick="setLang('uz')">UZ</button>
+                <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+            </div>
+            <button class="icon-btn" onclick="openCart()">
+                🛒 <span id="cartLabel">Корзина</span> <span class="cart-badge" id="cartCount">0</span>
+            </button>
+            <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+        </div>
+    </header>
+
+    <div class="container" id="top">
+        <!-- Hero -->
+        <section class="hero">
+            <div>
+                <h1 id="heroTitle">Мега-каталог из <span>20 смартфонов</span> нового поколения</h1>
+                <p id="heroDesc">Огромный интерактивный каталог флагманов, камерфонов и хитов рынка от Apple, Samsung, Xiaomi, Google и OnePlus. Сравнивайте характеристики, собирайте корзину и оставляйте свои контакты для связи в конце страницы.</p>
+                <div class="hero-btns">
+                    <a href="#catalog" class="btn-primary" id="heroBtnPrimary">Смотреть 20 моделей →</a>
+                    <a href="#compare" class="btn-secondary" id="heroBtnSecondary">Сравнить модели</a>
+                    <a href="#contact" class="btn-secondary" id="heroBtnContact">Оставить контакты</a>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-num">20</div>
+                        <div class="stat-label" id="stat1">Моделей в каталоге</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num">5</div>
+                        <div class="stat-label" id="stat2">Ведущих брендов</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num">3</div>
+                        <div class="stat-label" id="stat3">Языка интерфейса</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num">24/7</div>
+                        <div class="stat-label" id="stat4">Поддержка и гарантия</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-showcase">
+                <div class="floating-phone" onclick="openPhoneModal(1)">
+                    <div class="island"></div>
+                    <div style="text-align:center;">
+                        <div style="font-size:0.75rem; opacity:0.85; font-weight:700;">NEXUS MEGA 20</div>
+                        <div style="font-size:1.35rem; font-weight:900; margin-top:4px;">iPhone 16 Pro Max</div>
+                        <div style="font-size:0.82rem; margin-top:8px; opacity:0.9;">A18 Pro • 48MP • 120Hz</div>
+                    </div>
+                    <div class="home-bar"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Каталог -->
+        <section id="catalog">
+            <div class="section-header">
+                <span class="section-tag" id="catTag">КАТАЛОГ ИЗ 20 УСТРОЙСТВ</span>
+                <h2 id="catTitle">Выберите свой смартфон</h2>
+                <p id="catSubtitle">Фильтруйте по бренду, ищите по названию, сортируйте по цене или нажмите на карточку для просмотра детальных характеристик.</p>
+            </div>
+
+            <div class="toolbar">
+                <div class="filter-pills" id="brandFilters">
+                    <button class="pill-btn active" data-brand="all" onclick="setBrand('all', this)" id="filterAll">Все (20)</button>
+                    <button class="pill-btn" data-brand="Apple" onclick="setBrand('Apple', this)" id="filterApple">Apple (4)</button>
+                    <button class="pill-btn" data-brand="Samsung" onclick="setBrand('Samsung', this)" id="filterSamsung">Samsung (4)</button>
+                    <button class="pill-btn" data-brand="Xiaomi" onclick="setBrand('Xiaomi', this)" id="filterXiaomi">Xiaomi (4)</button>
+                    <button class="pill-btn" data-brand="Google" onclick="setBrand('Google', this)" id="filterGoogle">Google (4)</button>
+                    <button class="pill-btn" data-brand="OnePlus" onclick="setBrand('OnePlus', this)" id="filterOnePlus">OnePlus (4)</button>
+                </div>
+                <div class="search-sort">
+                    <input type="text" class="input-glass" id="searchInput" oninput="renderCatalog()" placeholder="Поиск по модели...">
+                    <select class="input-glass" id="sortSelect" onchange="renderCatalog()">
+                        <option value="default" id="sortDefault">Сортировка: Популярные</option>
+                        <option value="priceAsc" id="sortAsc">Цена: по возрастанию</option>
+                        <option value="priceDesc" id="sortDesc">Цена: по убыванию</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="catalog-grid" id="catalogGrid"></div>
+        </section>
+
+        <!-- Сравнение -->
+        <section id="compare">
+            <div class="section-header">
+                <span class="section-tag" id="cmpTag">СРАВНЕНИЕ</span>
+                <h2 id="cmpTitle">Битва характеристик</h2>
+                <p id="cmpSubtitle">Выберите любые два смартфона из 20 моделей и сравните экран, процессор, камеру, батарею и цену.</p>
+            </div>
+
+            <div class="compare-box">
+                <div class="compare-selectors">
+                    <select class="input-glass" id="compareSelect1" onchange="renderCompare()"></select>
+                    <div class="vs-badge">VS</div>
+                    <select class="input-glass" id="compareSelect2" onchange="renderCompare()"></select>
+                </div>
+                <div class="compare-table-wrap">
+                    <table class="spec-table" id="compareTable"></table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Технологии -->
+        <section id="technologies">
+            <div class="section-header">
+                <span class="section-tag" id="techTag">ТЕХНОЛОГИИ</span>
+                <h2 id="techTitle">Почему NEXUS MOBILE</h2>
+                <p id="techSubtitle">Только проверенные флагманы, официальная гарантия и удобный подбор.</p>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-icon">⚡</div>
+                    <h3 id="tech1Title">Флагманская производительность</h3>
+                    <p id="tech1Desc">Новейшие чипы с поддержкой ИИ, трассировки лучей и мгновенной многозадачности без троттлинга.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">📸</div>
+                    <h3 id="tech2Title">Профессиональная оптика</h3>
+                    <p id="tech2Desc">Крупные сенсоры, перископический зум, ночная съёмка и запись видео в кинематографическом качестве.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">🔋</div>
+                    <h3 id="tech3Title">Автономность и быстрая зарядка</h3>
+                    <p id="tech3Desc">Ёмкие аккумуляторы и сверхбыстрая проводная/беспроводная зарядка для целого дня активной работы.</p>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">🛡️</div>
+                    <h3 id="tech4Title">Гарантия и поддержка</h3>
+                    <p id="tech4Desc">Официальная гарантия, быстрая доставка и помощь при выборе смартфона на трёх языках.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq">
+            <div class="section-header">
+                <span class="section-tag">FAQ</span>
+                <h2 id="faqTitle">Частые вопросы</h2>
+            </div>
+
+            <div class="faq-list" id="faqList"></div>
+        </section>
+
+        <!-- Форма контактов в конце -->
+        <section id="contact">
+            <div class="section-header">
+                <span class="section-tag" id="contactTag">ОБРАТНАЯ СВЯЗЬ</span>
+                <h2 id="contactTitle">Оставьте свои контакты</h2>
+                <p id="contactSubtitle">Укажите своё имя, email и номер телефона — мы поможем подобрать смартфон или оформить заказ.</p>
+            </div>
+
+            <div class="contact-box">
+                <form id="contactForm" onsubmit="submitContactForm(event)">
+                    <div class="contact-grid">
+                        <div class="field-group">
+                            <label for="userName" id="labelName">Ваше имя *</label>
+                            <input type="text" class="field-input" id="userName" required placeholder="Например: Алексей">
+                        </div>
+                        <div class="field-group">
+                            <label for="userEmail" id="labelEmail">Ваш Email *</label>
+                            <input type="email" class="field-input" id="userEmail" required placeholder="name@example.com">
+                        </div>
+                        <div class="field-group">
+                            <label for="userPhone" id="labelPhone">Номер телефона *</label>
+                            <input type="tel" class="field-input" id="userPhone" required placeholder="+998 90 123 45 67">
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="userComment" id="labelComment">Какая модель интересует или комментарий</label>
+                        <textarea class="field-input" id="userComment" placeholder="Например: интересует iPhone 16 Pro Max или Galaxy S24 Ultra..."></textarea>
+                    </div>
+
+                    <div class="contact-footer-row">
+                        <span style="font-size:0.86rem; color:var(--text-muted);" id="privacyNote">Ваши данные используются только для связи по вашему запросу.</span>
+                        <button type="submit" class="btn-primary" id="submitContactBtn">Отправить заявку ✓</button>
+                    </div>
+                </form>
+
+                <div class="submitted-preview" id="submittedPreview"></div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p id="footerText">© 2026 NEXUS MOBILE. Интерактивный мега-каталог из 20 смартфонов.</p>
+    </footer>
+
+    <!-- Модальное окно деталей -->
+    <div class="modal-backdrop" id="phoneModal" onclick="closeOnBackdrop(event, 'phoneModal')">
+        <div class="modal-box" id="phoneModalContent"></div>
+    </div>
+
+    <!-- Модальное окно корзины -->
+    <div class="modal-backdrop" id="cartModal" onclick="closeOnBackdrop(event, 'cartModal')">
+        <div class="modal-box" id="cartModalContent"></div>
+    </div>
+
+    <!-- Уведомление -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const phones = [
+            // Apple (4)
+            {
+                id: 1,
+                brand: "Apple",
+                name: "iPhone 16 Pro Max",
+                price: 1199,
+                badge: "TOP",
+                gradient: "linear-gradient(155deg, #334155, #0f172a, #475569)",
+                short: {
+                    ru: "Титановый корпус, чип A18 Pro и 5-кратный оптический зум.",
+                    uz: "Titan korpus, A18 Pro chipi va 5x optik zum.",
+                    en: "Titanium frame, A18 Pro chip, and 5x optical zoom."
+                },
+                specs: {
+                    display: '6.9" Super Retina XDR OLED, 120Hz',
+                    chip: "Apple A18 Pro (3nm)",
+                    camera: "48MP Main + 48MP Ultra + 12MP 5x Tele",
+                    battery: "4685 mAh, MagSafe & USB-C"
+                }
+            },
+            {
+                id: 2,
+                brand: "Apple",
+                name: "iPhone 16 Pro",
+                price: 999,
+                badge: "PRO",
+                gradient: "linear-gradient(155deg, #64748b, #1e293b, #94a3b8)",
+                short: {
+                    ru: "Компактный титановый флагман с ProMotion 120 Гц и A18 Pro.",
+                    uz: "120 Hz ProMotion va A18 Pro chipli ixcham flagman.",
+                    en: "Compact titanium flagship with 120Hz ProMotion and A18 Pro."
+                },
+                specs: {
+                    display: '6.3" Super Retina XDR OLED, 120Hz',
+                    chip: "Apple A18 Pro (3nm)",
+                    camera: "48MP Main + 48MP Ultra + 12MP 5x Tele",
+                    battery: "3582 mAh, MagSafe & USB-C"
+                }
+            },
+            {
+                id: 3,
+                brand: "Apple",
+                name: "iPhone 16 Plus",
+                price: 899,
+                badge: "BATTERY",
+                gradient: "linear-gradient(155deg, #14b8a6, #0f766e, #2dd4bf)",
+                short: {
+                    ru: "Большой экран 6.7 дюйма, чип A18 и высокая автономность.",
+                    uz: "6.7 dyuymli katta ekran, A18 chip va uzoq avtonomlik.",
+                    en: "Large 6.7-inch display, A18 chip, and great battery life."
+                },
+                specs: {
+                    display: '6.7" Super Retina XDR OLED, 60Hz',
+                    chip: "Apple A18 (3nm)",
+                    camera: "48MP Fusion + 12MP Ultra Wide",
+                    battery: "4674 mAh, MagSafe & USB-C"
+                }
+            },
+            {
+                id: 4,
+                brand: "Apple",
+                name: "iPhone 16",
+                price: 799,
+                badge: "NEW",
+                gradient: "linear-gradient(155deg, #3b82f6, #1d4ed8, #60a5fa)",
+                short: {
+                    ru: "Кнопка управления камерой, чип A18 и яркий дисплей.",
+                    uz: "Kamera boshqaruv tugmasi, A18 chip va yorqin ekran.",
+                    en: "Camera Control button, A18 chip, and vibrant display."
+                },
+                specs: {
+                    display: '6.1" Super Retina XDR OLED, 60Hz',
+                    chip: "Apple A18 (3nm)",
+                    camera: "48MP Fusion + 12MP Ultra Wide",
+                    battery: "3561 mAh, MagSafe & USB-C"
+                }
+            },
+
+            // Samsung (4)
+            {
+                id: 5,
+                brand: "Samsung",
+                name: "Galaxy S24 Ultra",
+                price: 1299,
+                badge: "AI",
+                gradient: "linear-gradient(155deg, #6366f1, #312e81, #8b5cf6)",
+                short: {
+                    ru: "Встроенный S Pen, титан, Galaxy AI и камера 200 Мп.",
+                    uz: "S Pen qalami, titan, Galaxy AI va 200 MP kamera.",
+                    en: "Built-in S Pen, titanium, Galaxy AI, and 200MP camera."
+                },
+                specs: {
+                    display: '6.8" Dynamic AMOLED 2X, 120Hz, 2600 nits',
+                    chip: "Snapdragon 8 Gen 3 for Galaxy",
+                    camera: "200MP Main + 50MP 5x + 10MP 3x + 12MP UW",
+                    battery: "5000 mAh, 45W Fast Charge"
+                }
+            },
+            {
+                id: 6,
+                brand: "Samsung",
+                name: "Galaxy Z Fold6",
+                price: 1899,
+                badge: "FOLD",
+                gradient: "linear-gradient(155deg, #818cf8, #4338ca, #c084fc)",
+                short: {
+                    ru: "Складной смартфон-планшет с двумя экранами и ИИ.",
+                    uz: "Ikki ekranli va AI funksiyali buklanadigan smartfon.",
+                    en: "Foldable phone-tablet with dual screens and Galaxy AI."
+                },
+                specs: {
+                    display: '7.6" Main + 6.3" Cover AMOLED, 120Hz',
+                    chip: "Snapdragon 8 Gen 3 for Galaxy",
+                    camera: "50MP Main + 12MP Ultra Wide + 10MP 3x",
+                    battery: "4400 mAh, 25W Wired & Wireless"
+                }
+            },
+            {
+                id: 7,
+                brand: "Samsung",
+                name: "Galaxy S24+",
+                price: 999,
+                badge: "HIT",
+                gradient: "linear-gradient(155deg, #06b6d4, #0e7490, #38bdf8)",
+                short: {
+                    ru: "QHD+ экран, функции Galaxy AI и быстрая зарядка.",
+                    uz: "QHD+ ekran, Galaxy AI funksiyalari va tezkor quvvatlash.",
+                    en: "QHD+ display, Galaxy AI features, and fast charging."
+                },
+                specs: {
+                    display: '6.7" Dynamic AMOLED 2X QHD+, 120Hz',
+                    chip: "Exynos 2400 / Snapdragon 8 Gen 3",
+                    camera: "50MP Main + 12MP Ultra Wide + 10MP 3x",
+                    battery: "4900 mAh, 45W Fast Charge"
+                }
+            },
+            {
+                id: 8,
+                brand: "Samsung",
+                name: "Galaxy A55 5G",
+                price: 449,
+                badge: "POPULAR",
+                gradient: "linear-gradient(155deg, #0ea5e9, #1e3a8a, #7dd3fc)",
+                short: {
+                    ru: "Металлическая рамка, защита IP67 и плавный AMOLED-экран.",
+                    uz: "Metall ramka, IP67 himoya va silliq AMOLED ekran.",
+                    en: "Metal frame, IP67 rating, and smooth AMOLED display."
+                },
+                specs: {
+                    display: '6.6" Super AMOLED FHD+, 120Hz',
+                    chip: "Exynos 1480 (4nm)",
+                    camera: "50MP OIS Main + 12MP UW + 5MP Macro",
+                    battery: "5000 mAh, 25W Fast Charge"
+                }
+            },
+
+            // Xiaomi (4)
+            {
+                id: 9,
+                brand: "Xiaomi",
+                name: "Xiaomi 14 Ultra",
+                price: 1149,
+                badge: "LEICA",
+                gradient: "linear-gradient(155deg, #f97316, #ea580c, #fbbf24)",
+                short: {
+                    ru: "Оптика Leica Summilux с переменной диафрагмой.",
+                    uz: "O‘zgaruvchan diafragmali Leica Summilux optikasi.",
+                    en: "Leica Summilux optics with variable aperture."
+                },
+                specs: {
+                    display: '6.73" LTPO AMOLED WQHD+, 120Hz, 3000 nits',
+                    chip: "Snapdragon 8 Gen 3",
+                    camera: "Quad 50MP Leica (1-inch main sensor)",
+                    battery: "5000 mAh, 90W Wired + 80W Wireless"
+                }
+            },
+            {
+                id: 10,
+                brand: "Xiaomi",
+                name: "Xiaomi 14",
+                price: 899,
+                badge: "COMPACT",
+                gradient: "linear-gradient(155deg, #fb923c, #c2410c, #fde047)",
+                short: {
+                    ru: "Компактный флагман с камерами Leica и высокой яркостью.",
+                    uz: "Leica kamerali va yuqori yorqinlikka ega ixcham flagman.",
+                    en: "Compact flagship with Leica cameras and high brightness."
+                },
+                specs: {
+                    display: '6.36" LTPO OLED 1.5K, 120Hz, 3000 nits',
+                    chip: "Snapdragon 8 Gen 3",
+                    camera: "50MP Leica Main + 50MP Tele + 50MP UW",
+                    battery: "4610 mAh, 90W Wired + 50W Wireless"
+                }
+            },
+            {
+                id: 11,
+                brand: "Xiaomi",
+                name: "Xiaomi 14T Pro",
+                price: 699,
+                badge: "144HZ",
+                gradient: "linear-gradient(155deg, #10b981, #047857, #34d399)",
+                short: {
+                    ru: "Экран 144 Гц, камера Leica и зарядка 120 Вт.",
+                    uz: "144 Hz ekran, Leica kamera va 120 Vt quvvatlash.",
+                    en: "144Hz display, Leica camera, and 120W charging."
+                },
+                specs: {
+                    display: '6.67" CrystalRes AMOLED, 144Hz, 4000 nits',
+                    chip: "MediaTek Dimensity 9300+",
+                    camera: "50MP Leica Main + 50MP Tele + 12MP UW",
+                    battery: "5000 mAh, 120W HyperCharge"
+                }
+            },
+            {
+                id: 12,
+                brand: "Xiaomi",
+                name: "POCO F6 Pro",
+                price: 529,
+                badge: "SPEED",
+                gradient: "linear-gradient(155deg, #eab308, #854d0e, #facc15)",
+                short: {
+                    ru: "WQHD+ дисплей, мощный процессор и зарядка 120 Вт.",
+                    uz: "WQHD+ ekran, kuchli protsessor va 120 Vt quvvatlash.",
+                    en: "WQHD+ display, flagship chip, and 120W charging."
+                },
+                specs: {
+                    display: '6.67" Flow AMOLED WQHD+, 120Hz, 4000 nits',
+                    chip: "Snapdragon 8 Gen 2",
+                    camera: "50MP Light Fusion 800 + 8MP UW + 2MP Macro",
+                    battery: "5000 mAh, 120W Fast Charge"
+                }
+            },
+
+            // Google (4)
+            {
+                id: 13,
+                brand: "Google",
+                name: "Pixel 9 Pro XL",
+                price: 1099,
+                badge: "GEMINI",
+                gradient: "linear-gradient(155deg, #ec4899, #9d174d, #f472b6)",
+                short: {
+                    ru: "Чистый Android, Gemini AI и эталонная ночная съёмка.",
+                    uz: "Sof Android, Gemini AI va ajoyib tungi suratga olish.",
+                    en: "Pure Android, Gemini AI, and benchmark night photography."
+                },
+                specs: {
+                    display: '6.8" Super Actua LTPO OLED, 120Hz',
+                    chip: "Google Tensor G4",
+                    camera: "50MP Octa PD + 48MP 5x Tele + 48MP UW",
+                    battery: "5060 mAh, 37W Fast Charge"
+                }
+            },
+            {
+                id: 14,
+                brand: "Google",
+                name: "Pixel 9 Pro",
+                price: 999,
+                badge: "AI CAM",
+                gradient: "linear-gradient(155deg, #f43f5e, #881337, #fda4af)",
+                short: {
+                    ru: "Тройная камера Pro в удобном компактном корпусе.",
+                    uz: "Qulay ixcham korpusda uch kamerali Pro tizim.",
+                    en: "Pro triple camera system in a compact body."
+                },
+                specs: {
+                    display: '6.3" Super Actua LTPO OLED, 120Hz',
+                    chip: "Google Tensor G4",
+                    camera: "50MP Octa PD + 48MP 5x Tele + 48MP UW",
+                    battery: "4700 mAh, 27W Fast Charge"
+                }
+            },
+            {
+                id: 15,
+                brand: "Google",
+                name: "Pixel 9",
+                price: 799,
+                badge: "PURE AI",
+                gradient: "linear-gradient(155deg, #d946ef, #701a75, #e879f9)",
+                short: {
+                    ru: "Яркий экран Actua, ИИ-инструменты Google и обновлённый дизайн.",
+                    uz: "Yorqin Actua ekran, Google AI vositalari va yangi dizayn.",
+                    en: "Bright Actua display, Google AI tools, and refined design."
+                },
+                specs: {
+                    display: '6.3" Actua OLED, 120Hz, 2700 nits',
+                    chip: "Google Tensor G4",
+                    camera: "50MP Main + 48MP Macro Focus Ultra Wide",
+                    battery: "4700 mAh, 27W Fast Charge"
+                }
+            },
+            {
+                id: 16,
+                brand: "Google",
+                name: "Pixel 8a",
+                price: 499,
+                badge: "SMART",
+                gradient: "linear-gradient(155deg, #8b5cf6, #5b21b6, #a78bfa)",
+                short: {
+                    ru: "Компактный размер, плавный дисплей и умные фотофичи.",
+                    uz: "Ixcham o‘lcham, silliq ekran va aqlli kamera.",
+                    en: "Compact form factor, smooth display, and smart camera features."
+                },
+                specs: {
+                    display: '6.1" Actua OLED, 120Hz',
+                    chip: "Google Tensor G3",
+                    camera: "64MP Main + 13MP Ultra Wide",
+                    battery: "4492 mAh, 18W Wired"
+                }
+            },
+
+            // OnePlus (4)
+            {
+                id: 17,
+                brand: "OnePlus",
+                name: "OnePlus 12",
+                price: 799,
+                badge: "FAST",
+                gradient: "linear-gradient(155deg, #ef4444, #991b1b, #f87171)",
+                short: {
+                    ru: "Зарядка 100 Вт, Hasselblad камера и огромная батарея.",
+                    uz: "100 Vt quvvatlash, Hasselblad kamera va katta batareya.",
+                    en: "100W charging, Hasselblad camera, and big battery."
+                },
+                specs: {
+                    display: '6.82" ProXDR LTPO AMOLED, 120Hz, 4500 nits',
+                    chip: "Snapdragon 8 Gen 3",
+                    camera: "50MP Sony LYT-808 + 64MP 3x + 48MP UW",
+                    battery: "5400 mAh, 100W SUPERVOOC"
+                }
+            },
+            {
+                id: 18,
+                brand: "OnePlus",
+                name: "OnePlus Open",
+                price: 1599,
+                badge: "PRO FOLD",
+                gradient: "linear-gradient(155deg, #dc2626, #450a0a, #fb7185)",
+                short: {
+                    ru: "Лёгкий складной флагман с камерами Hasselblad.",
+                    uz: "Hasselblad kamerali yengil buklanadigan flagman.",
+                    en: "Lightweight foldable flagship with Hasselblad cameras."
+                },
+                specs: {
+                    display: '7.82" Inner + 6.31" Cover AMOLED, 120Hz',
+                    chip: "Snapdragon 8 Gen 2",
+                    camera: "48MP Pixel Stacked + 64MP 3x + 48MP UW",
+                    battery: "4805 mAh, 67W SUPERVOOC"
+                }
+            },
+            {
+                id: 19,
+                brand: "OnePlus",
+                name: "OnePlus 12R",
+                price: 549,
+                badge: "GAMING",
+                gradient: "linear-gradient(155deg, #0d9488, #115e59, #5eead4)",
+                short: {
+                    ru: "Высокая частота кадров для игр и быстрая зарядка.",
+                    uz: "O‘yinlar uchun yuqori kadr chastotasi va tezkor quvvat.",
+                    en: "High refresh rate for gaming and rapid charging."
+                },
+                specs: {
+                    display: '6.78" AMOLED LTPO4, 120Hz',
+                    chip: "Snapdragon 8 Gen 2",
+                    camera: "50MP Main + 8MP Ultra Wide + 2MP Macro",
+                    battery: "5500 mAh, 100W SUPERVOOC"
+                }
+            },
+            {
+                id: 20,
+                brand: "OnePlus",
+                name: "OnePlus Nord 4",
+                price: 429,
+                badge: "METAL",
+                gradient: "linear-gradient(155deg, #0284c7, #1e293b, #38bdf8)",
+                short: {
+                    ru: "Цельнометаллический корпус, 100 Вт зарядка и долгая автономность.",
+                    uz: "Yaxlit metall korpus, 100 Vt quvvatlash va uzoq ishlash.",
+                    en: "Unibody metal design, 100W charging, and long battery life."
+                },
+                specs: {
+                    display: '6.74" Fluid AMOLED, 120Hz, 2150 nits',
+                    chip: "Snapdragon 7+ Gen 3",
+                    camera: "50MP Sony LYT-600 OIS + 8MP Ultra Wide",
+                    battery: "5500 mAh, 100W SUPERVOOC"
+                }
+            }
+        ];
+
+        const i18n = {
+            ru: {
+                navCatalog: "Каталог (20)",
+                navCompare: "Сравнение",
+                navTech: "Технологии",
+                navFaq: "FAQ",
+                navContact: "Контакты",
+                cartLabel: "Корзина",
+                heroTitle: 'Мега-каталог из <span>20 смартфонов</span> нового поколения',
+                heroDesc: "Огромный интерактивный каталог флагманов, камерфонов и хитов рынка от Apple, Samsung, Xiaomi, Google и OnePlus. Сравнивайте характеристики, собирайте корзину и оставляйте свои контакты для связи в конце страницы.",
+                heroBtnPrimary: "Смотреть 20 моделей →",
+                heroBtnSecondary: "Сравнить модели",
+                heroBtnContact: "Оставить контакты",
+                stat1: "Моделей в каталоге",
+                stat2: "Ведущих брендов",
+                stat3: "Языка интерфейса",
+                stat4: "Поддержка и гарантия",
+                catTag: "КАТАЛОГ ИЗ 20 УСТРОЙСТВ",
+                catTitle: "Выберите свой смартфон",
+                catSubtitle: "Фильтруйте по бренду, ищите по названию, сортируйте по цене или нажмите на карточку для просмотра детальных характеристик.",
+                filterAll: "Все (20)",
+                filterApple: "Apple (4)",
+                filterSamsung: "Samsung (4)",
+                filterXiaomi: "Xiaomi (4)",
+                filterGoogle: "Google (4)",
+                filterOnePlus: "OnePlus (4)",
+                searchPlaceholder: "Поиск по модели...",
+                sortDefault: "Сортировка: Популярные",
+                sortAsc: "Цена: по возрастанию",
+                sortDesc: "Цена: по убыванию",
+                detailsBtn: "Детали",
+                compareBtn: "Сравнить",
+                addToCart: "В корзину",
+                cmpTag: "СРАВНЕНИЕ",
+                cmpTitle: "Битва характеристик",
+                cmpSubtitle: "Выберите любые два смартфона из 20 моделей и сравните экран, процессор, камеру, батарею и цену.",
+                specBrand: "Бренд",
+                specPrice: "Цена",
+                specDisplay: "Экран",
+                specChip: "Процессор",
+                specCamera: "Камера",
+                specBattery: "Батарея",
+                techTag: "ТЕХНОЛОГИИ",
+                techTitle: "Почему NEXUS MOBILE",
+                techSubtitle: "Только проверенные флагманы, официальная гарантия и удобный подбор.",
+                tech1Title: "Флагманская производительность",
+                tech1Desc: "Новейшие чипы с поддержкой ИИ, трассировки лучей и мгновенной многозадачности без троттлинга.",
+                tech2Title: "Профессиональная оптика",
+                tech2Desc: "Крупные сенсоры, перископический зум, ночная съёмка и запись видео в кинематографическом качестве.",
+                tech3Title: "Автономность и быстрая зарядка",
+                tech3Desc: "Ёмкие аккумуляторы и сверхбыстрая проводная/беспроводная зарядка для целого дня активной работы.",
+                tech4Title: "Гарантия и поддержка",
+                tech4Desc: "Официальная гарантия, быстрая доставка и помощь при выборе смартфона на трёх языках.",
+                faqTitle: "Частые вопросы",
+                contactTag: "ОБРАТНАЯ СВЯЗЬ",
+                contactTitle: "Оставьте свои контакты",
+                contactSubtitle: "Укажите своё имя, email и номер телефона — мы поможем подобрать смартфон или оформить заказ.",
+                labelName: "Ваше имя *",
+                labelEmail: "Ваш Email *",
+                labelPhone: "Номер телефона *",
+                labelComment: "Какая модель интересует или комментарий",
+                namePlaceholder: "Например: Алексей",
+                emailPlaceholder: "name@example.com",
+                phonePlaceholder: "+998 90 123 45 67",
+                commentPlaceholder: "Например: интересует iPhone 16 Pro Max или Galaxy S24 Ultra...",
+                privacyNote: "Ваши данные используются только для связи по вашему запросу.",
+                submitContactBtn: "Отправить заявку ✓",
+                contactSavedTitle: "Заявка принята! Ваши контактные данные:",
+                contactToast: "Спасибо! Ваша заявка отправлена.",
+                cartTitle: "Ваша корзина",
+                cartEmpty: "Корзина пока пуста. Добавьте любой смартфон из 20 моделей!",
+                totalLabel: "Итого:",
+                checkoutBtn: "Оформить заказ",
+                addedToast: "Добавлено в корзину: ",
+                orderToast: "Заказ успешно оформлен! Спасибо за покупку.",
+                footerText: "© 2026 NEXUS MOBILE. Интерактивный мега-каталог из 20 смартфонов.",
+                faq: [
+                    { q: "Сколько всего смартфонов представлено в каталоге?", a: "В каталоге представлено 20 моделей — по 4 смартфона от каждого из пяти брендов: Apple, Samsung, Xiaomi, Google и OnePlus." },
+                    { q: "Как сравнить любые две модели между собой?", a: "Нажмите кнопку «Сравнить» на карточке любого смартфона или выберите модели в выпадающих списках раздела «Сравнение»." },
+                    { q: "Куда ввести своё имя, email и номер телефона?", a: "В самом конце страницы расположен раздел «Оставьте свои контакты», где можно заполнить имя, email, номер телефона и комментарий." }
+                ]
+            },
+            uz: {
+                navCatalog: "Katalog (20)",
+                navCompare: "Taqqoslash",
+                navTech: "Texnologiyalar",
+                navFaq: "FAQ",
+                navContact: "Kontaktlar",
+                cartLabel: "Savat",
+                heroTitle: 'Yangi avlod <span>20 ta smartfonidan</span> iborat mega-katalog',
+                heroDesc: "Apple, Samsung, Xiaomi, Google va OnePlus brendlarining flagman hamda mashhur modellari. Xususiyatlarni solishtiring, savatga qo‘shing va sahifa oxirida kontaktingizni qoldiring.",
+                heroBtnPrimary: "20 modelni ko‘rish →",
+                heroBtnSecondary: "Modellarni taqqoslash",
+                heroBtnContact: "Kontakt qoldirish",
+                stat1: "Katalogdagi modellar",
+                stat2: "Asosiy brendlar",
+                stat3: "Interfeys tili",
+                stat4: "Qo‘llab-quvvatlash",
+                catTag: "20 TA QURILMA KATALOGI",
+                catTitle: "Smartfoningizni tanlang",
+                catSubtitle: "Brend bo‘yicha filtrlang, nom bo‘yicha qidiring, narx bo‘yicha saralang yoki batafsil ko‘rish uchun kartani bosing.",
+                filterAll: "Barchasi (20)",
+                filterApple: "Apple (4)",
+                filterSamsung: "Samsung (4)",
+                filterXiaomi: "Xiaomi (4)",
+                filterGoogle: "Google (4)",
+                filterOnePlus: "OnePlus (4)",
+                searchPlaceholder: "Model bo‘yicha qidiruv...",
+                sortDefault: "Saralash: Mashhur",
+                sortAsc: "Narx: arzonidan qimmatiga",
+                sortDesc: "Narx: qimmatidan arzoniga",
+                detailsBtn: "Batafsil",
+                compareBtn: "Taqqoslash",
+                addToCart: "Savatga",
+                cmpTag: "TAQQOSLASH",
+                cmpTitle: "Xususiyatlar bellashuvi",
+                cmpSubtitle: "20 ta modeldan ikkitasini tanlab, ekran, protsessor, kamera, batareya va narxni solishtiring.",
+                specBrand: "Brend",
+                specPrice: "Narx",
+                specDisplay: "Ekran",
+                specChip: "Protsessor",
+                specCamera: "Kamera",
+                specBattery: "Batareya",
+                techTag: "TEXNOLOGIYALAR",
+                techTitle: "Nima uchun NEXUS MOBILE",
+                techSubtitle: "Faqat ishonchli flagmanlar, kafolat va qulay tanlov.",
+                tech1Title: "Flagman unumdorligi",
+                tech1Desc: "Sun'iy intellekt qo‘llab-quvvatlovchi yangi chiplar va tezkor ko‘p vazifalilik.",
+                tech2Title: "Professional kamera",
+                tech2Desc: "Katta sensorlar, optik zum, tungi suratga olish va yuqori sifatli video.",
+                tech3Title: "Uzoq avtonomlik va tezkor quvvat",
+                tech3Desc: "Sig‘imli batareyalar va tezkor simli/simsiz quvvatlash texnologiyalari.",
+                tech4Title: "Kafolat va yordam",
+                tech4Desc: "Rasmiy kafolat, tezkor yetkazib berish va uch tilda maslahat.",
+                faqTitle: "Ko‘p beriladigan savollar",
+                contactTag: "QAYTA ALOQA",
+                contactTitle: "Kontaktlaringizni qoldiring",
+                contactSubtitle: "Ismingiz, email va telefon raqamingizni kiriting — sizga mos smartfonni tanlashga yordam beramiz.",
+                labelName: "Ismingiz *",
+                labelEmail: "Email manzilingiz *",
+                labelPhone: "Telefon raqamingiz *",
+                labelComment: "Qaysi model qiziqtiradi yoki izoh",
+                namePlaceholder: "Masalan: Azizbek",
+                emailPlaceholder: "name@example.com",
+                phonePlaceholder: "+998 90 123 45 67",
+                commentPlaceholder: "Masalan: iPhone 16 Pro Max yoki Galaxy S24 Ultra...",
+                privacyNote: "Ma'lumotlaringiz faqat so‘rovingiz bo‘yicha bog‘lanish uchun ishlatiladi.",
+                submitContactBtn: "Yuborish ✓",
+                contactSavedTitle: "So‘rov qabul qilindi! Kontakt ma'lumotlaringiz:",
+                contactToast: "Rahmat! So‘rovingiz yuborildi.",
+                cartTitle: "Sizning savatingiz",
+                cartEmpty: "Savat hozircha bo‘sh. 20 ta modeldan birini qo‘shing!",
+                totalLabel: "Jami:",
+                checkoutBtn: "Buyurtma berish",
+                addedToast: "Savatga qo‘shildi: ",
+                orderToast: "Buyurtma qabul qilindi! Xaridingiz uchun rahmat.",
+                footerText: "© 2026 NEXUS MOBILE. 20 ta smartfondan iborat interaktiv mega-katalog.",
+                faq: [
+                    { q: "Katalogda nechta smartfon bor?", a: "Katalogda 20 ta model bor: Apple, Samsung, Xiaomi, Google va OnePlus brendlarining har biridan 4 tadan." },
+                    { q: "Istalgan ikki modelni qanday solishtirish mumkin?", a: "Kartadagi «Taqqoslash» tugmasini bosing yoki «Taqqoslash» bo‘limida ikki modelni tanlang." },
+                    { q: "Ism, email va telefon raqamni qayerga yozish kerak?", a: "Sahifa oxiridagi «Kontaktlaringizni qoldiring» bo‘limida barcha maydonlarni to‘ldirishingiz mumkin." }
+                ]
+            },
+            en: {
+                navCatalog: "Catalog (20)",
+                navCompare: "Compare",
+                navTech: "Tech",
+                navFaq: "FAQ",
+                navContact: "Contact",
+                cartLabel: "Cart",
+                heroTitle: 'Mega-catalog of <span>20 smartphones</span> next-gen style',
+                heroDesc: "An interactive catalog of 20 flagships, camera phones, and top picks from Apple, Samsung, Xiaomi, Google, and OnePlus. Compare specs, build a cart, and leave your contact details at the bottom.",
+                heroBtnPrimary: "Explore 20 models →",
+                heroBtnSecondary: "Compare models",
+                heroBtnContact: "Leave contact info",
+                stat1: "Models in catalog",
+                stat2: "Top brands",
+                stat3: "UI languages",
+                stat4: "Support & warranty",
+                catTag: "20-DEVICE CATALOG",
+                catTitle: "Choose your smartphone",
+                catSubtitle: "Filter by brand, search by name, sort by price, or click any card for full specifications.",
+                filterAll: "All (20)",
+                filterApple: "Apple (4)",
+                filterSamsung: "Samsung (4)",
+                filterXiaomi: "Xiaomi (4)",
+                filterGoogle: "Google (4)",
+                filterOnePlus: "OnePlus (4)",
+                searchPlaceholder: "Search model...",
+                sortDefault: "Sort: Featured",
+                sortAsc: "Price: Low to High",
+                sortDesc: "Price: High to Low",
+                detailsBtn: "Details",
+                compareBtn: "Compare",
+                addToCart: "Add to cart",
+                cmpTag: "COMPARE",
+                cmpTitle: "Spec showdown",
+                cmpSubtitle: "Pick any two out of 20 smartphones and compare display, processor, camera, battery, and price.",
+                specBrand: "Brand",
+                specPrice: "Price",
+                specDisplay: "Display",
+                specChip: "Processor",
+                specCamera: "Camera",
+                specBattery: "Battery",
+                techTag: "TECHNOLOGIES",
+                techTitle: "Why NEXUS MOBILE",
+                techSubtitle: "Curated flagships, reliable warranty, and effortless comparison.",
+                tech1Title: "Flagship performance",
+                tech1Desc: "Next-gen silicon with AI acceleration, ray tracing, and smooth multitasking.",
+                tech2Title: "Pro-grade optics",
+                tech2Desc: "Large sensors, telephoto zoom, night photography, and cinema-grade video.",
+                tech3Title: "All-day battery & fast charge",
+                tech3Desc: "High-capacity batteries paired with fast wired and wireless charging.",
+                tech4Title: "Warranty & support",
+                tech4Desc: "Official warranty, fast delivery, and multilingual assistance.",
+                faqTitle: "Frequently asked questions",
+                contactTag: "GET IN TOUCH",
+                contactTitle: "Leave your contact details",
+                contactSubtitle: "Enter your name, email, and phone number — we will help you pick a phone or place an order.",
+                labelName: "Your name *",
+                labelEmail: "Your email *",
+                labelPhone: "Phone number *",
+                labelComment: "Model of interest or message",
+                namePlaceholder: "e.g. Alex Morgan",
+                emailPlaceholder: "name@example.com",
+                phonePlaceholder: "+1 555 234 5678",
+                commentPlaceholder: "e.g. Interested in iPhone 16 Pro Max or Galaxy S24 Ultra...",
+                privacyNote: "Your details are used solely to respond to your inquiry.",
+                submitContactBtn: "Send inquiry ✓",
+                contactSavedTitle: "Inquiry received! Your contact details:",
+                contactToast: "Thank you! Your inquiry has been submitted.",
+                cartTitle: "Your cart",
+                cartEmpty: "Your cart is empty. Add any of the 20 smartphones!",
+                totalLabel: "Total:",
+                checkoutBtn: "Checkout",
+                addedToast: "Added to cart: ",
+                orderToast: "Order placed! Thank you for shopping with us.",
+                footerText: "© 2026 NEXUS MOBILE. Interactive mega-catalog of 20 smartphones.",
+                faq: [
+                    { q: "How many smartphones are in the catalog?", a: "There are 20 smartphones in total — 4 models each from Apple, Samsung, Xiaomi, Google, and OnePlus." },
+                    { q: "How do I compare any two smartphones?", a: "Click 'Compare' on any card or choose two phones in the 'Compare' section." },
+                    { q: "Where can I enter my name, email, and phone number?", a: "Scroll to the bottom 'Leave your contact details' section to enter your name, email, phone number, and note." }
+                ]
+            }
+        };
+
+        let currentLang = "ru";
+        let currentBrand = "all";
+        let cart = [];
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.querySelectorAll(".lang-btn").forEach(btn => {
+                btn.classList.toggle("active", btn.dataset.lang === lang);
+            });
+
+            const t = i18n[lang];
+            document.getElementById("navCatalog").textContent = t.navCatalog;
+            document.getElementById("navCompare").textContent = t.navCompare;
+            document.getElementById("navTech").textContent = t.navTech;
+            document.getElementById("navFaq").textContent = t.navFaq;
+            document.getElementById("navContact").textContent = t.navContact;
+            document.getElementById("cartLabel").textContent = t.cartLabel;
+            document.getElementById("heroTitle").innerHTML = t.heroTitle;
+            document.getElementById("heroDesc").textContent = t.heroDesc;
+            document.getElementById("heroBtnPrimary").textContent = t.heroBtnPrimary;
+            document.getElementById("heroBtnSecondary").textContent = t.heroBtnSecondary;
+            document.getElementById("heroBtnContact").textContent = t.heroBtnContact;
+            document.getElementById("stat1").textContent = t.stat1;
+            document.getElementById("stat2").textContent = t.stat2;
+            document.getElementById("stat3").textContent = t.stat3;
+            document.getElementById("stat4").textContent = t.stat4;
+            document.getElementById("catTag").textContent = t.catTag;
+            document.getElementById("catTitle").textContent = t.catTitle;
+            document.getElementById("catSubtitle").textContent = t.catSubtitle;
+            document.getElementById("filterAll").textContent = t.filterAll;
+            document.getElementById("filterApple").textContent = t.filterApple;
+            document.getElementById("filterSamsung").textContent = t.filterSamsung;
+            document.getElementById("filterXiaomi").textContent = t.filterXiaomi;
+            document.getElementById("filterGoogle").textContent = t.filterGoogle;
+            document.getElementById("filterOnePlus").textContent = t.filterOnePlus;
+            document.getElementById("searchInput").placeholder = t.searchPlaceholder;
+            document.getElementById("sortDefault").textContent = t.sortDefault;
+            document.getElementById("sortAsc").textContent = t.sortAsc;
+            document.getElementById("sortDesc").textContent = t.sortDesc;
+            document.getElementById("cmpTag").textContent = t.cmpTag;
+            document.getElementById("cmpTitle").textContent = t.cmpTitle;
+            document.getElementById("cmpSubtitle").textContent = t.cmpSubtitle;
+            document.getElementById("techTag").textContent = t.techTag;
+            document.getElementById("techTitle").textContent = t.techTitle;
+            document.getElementById("techSubtitle").textContent = t.techSubtitle;
+            document.getElementById("tech1Title").textContent = t.tech1Title;
+            document.getElementById("tech1Desc").textContent = t.tech1Desc;
+            document.getElementById("tech2Title").textContent = t.tech2Title;
+            document.getElementById("tech2Desc").textContent = t.tech2Desc;
+            document.getElementById("tech3Title").textContent = t.tech3Title;
+            document.getElementById("tech3Desc").textContent = t.tech3Desc;
+            document.getElementById("tech4Title").textContent = t.tech4Title;
+            document.getElementById("tech4Desc").textContent = t.tech4Desc;
+            document.getElementById("faqTitle").textContent = t.faqTitle;
+            document.getElementById("contactTag").textContent = t.contactTag;
+            document.getElementById("contactTitle").textContent = t.contactTitle;
+            document.getElementById("contactSubtitle").textContent = t.contactSubtitle;
+            document.getElementById("labelName").textContent = t.labelName;
+            document.getElementById("labelEmail").textContent = t.labelEmail;
+            document.getElementById("labelPhone").textContent = t.labelPhone;
+            document.getElementById("labelComment").textContent = t.labelComment;
+            document.getElementById("userName").placeholder = t.namePlaceholder;
+            document.getElementById("userEmail").placeholder = t.emailPlaceholder;
+            document.getElementById("userPhone").placeholder = t.phonePlaceholder;
+            document.getElementById("userComment").placeholder = t.commentPlaceholder;
+            document.getElementById("privacyNote").textContent = t.privacyNote;
+            document.getElementById("submitContactBtn").textContent = t.submitContactBtn;
+            document.getElementById("footerText").textContent = t.footerText;
+
+            renderCatalog();
+            renderCompare();
+            renderFAQ();
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+            if (isDark) {
+                document.documentElement.removeAttribute("data-theme");
+                document.getElementById("themeBtn").textContent = "🌙";
+            } else {
+                document.documentElement.setAttribute("data-theme", "dark");
+                document.getElementById("themeBtn").textContent = "☀️";
+            }
+        }
+
+        function setBrand(brand, btn) {
+            currentBrand = brand;
+            document.querySelectorAll("#brandFilters .pill-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            renderCatalog();
+        }
+
+        function renderCatalog() {
+            const grid = document.getElementById("catalogGrid");
+            const query = document.getElementById("searchInput").value.trim().toLowerCase();
+            const sort = document.getElementById("sortSelect").value;
+            const t = i18n[currentLang];
+
+            let list = phones.filter(p => {
+                const matchBrand = currentBrand === "all" || p.brand === currentBrand;
+                const matchQuery = !query || p.name.toLowerCase().includes(query) || p.brand.toLowerCase().includes(query);
+                return matchBrand && matchQuery;
+            });
+
+            if (sort === "priceAsc") list.sort((a, b) => a.price - b.price);
+            if (sort === "priceDesc") list.sort((a, b) => b.price - a.price);
+
+            grid.innerHTML = list.map(p => `
+                <article class="phone-card show">
+                    <span class="card-badge">${p.badge}</span>
+                    <div class="device-stage" onclick="openPhoneModal(${p.id})">
+                        <div class="phone-device" style="background:${p.gradient};">
+                            <div class="island"></div>
+                            <div class="device-label">${p.name}</div>
+                            <div class="home-bar"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card-brand">${p.brand}</div>
+                        <h3 class="card-title" onclick="openPhoneModal(${p.id})">${p.name}</h3>
+                        <p class="card-desc">${p.short[currentLang]}</p>
+                        <div class="mini-specs">
+                            <span class="mini-tag">${p.specs.chip.split("(")[0].trim()}</span>
+                            <span class="mini-tag">${p.specs.camera.split("+")[0].trim()}</span>
+                        </div>
+                    </div>
+                    <div class="card-bottom">
+                        <div class="price-tag">$${p.price}</div>
+                        <div class="card-actions">
+                            <button class="btn-sm btn-compare-sm" onclick="quickCompare(${p.id})">${t.compareBtn}</button>
+                            <button class="btn-sm btn-info" onclick="openPhoneModal(${p.id})">${t.detailsBtn}</button>
+                        </div>
+                    </div>
+                </article>
+            `).join("");
+        }
+
+        function initCompareSelectors() {
+            const s1 = document.getElementById("compareSelect1");
+            const s2 = document.getElementById("compareSelect2");
+            const options = phones.map(p => `<option value="${p.id}">${p.brand} — ${p.name} ($${p.price})</option>`).join("");
+            s1.innerHTML = options;
+            s2.innerHTML = options;
+            s1.value = "1";
+            s2.value = "5";
+        }
+
+        function quickCompare(id) {
+            document.getElementById("compareSelect1").value = String(id);
+            renderCompare();
+            document.getElementById("compare").scrollIntoView({ behavior: "smooth" });
+        }
+
+        function renderCompare() {
+            const p1 = phones.find(p => p.id === Number(document.getElementById("compareSelect1").value)) || phones[0];
+            const p2 = phones.find(p => p.id === Number(document.getElementById("compareSelect2").value)) || phones[4];
+            const t = i18n[currentLang];
+
+            document.getElementById("compareTable").innerHTML = `
+                <thead>
+                    <tr>
+                        <th>${t.cmpTag}</th>
+                        <th>${p1.name}</th>
+                        <th>${p2.name}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><th>${t.specBrand}</th><td>${p1.brand}</td><td>${p2.brand}</td></tr>
+                    <tr><th>${t.specPrice}</th><td><strong>$${p1.price}</strong></td><td><strong>$${p2.price}</strong></td></tr>
+                    <tr><th>${t.specDisplay}</th><td>${p1.specs.display}</td><td>${p2.specs.display}</td></tr>
+                    <tr><th>${t.specChip}</th><td>${p1.specs.chip}</td><td>${p2.specs.chip}</td></tr>
+                    <tr><th>${t.specCamera}</th><td>${p1.specs.camera}</td><td>${p2.specs.camera}</td></tr>
+                    <tr><th>${t.specBattery}</th><td>${p1.specs.battery}</td><td>${p2.specs.battery}</td></tr>
+                </tbody>
+            `;
+        }
+
+        function renderFAQ() {
+            const list = document.getElementById("faqList");
+            list.innerHTML = i18n[currentLang].faq.map((item, idx) => `
+                <div class="faq-item ${idx === 0 ? "open" : ""}">
+                    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+                        <span>${item.q}</span>
+                        <span>+</span>
+                    </button>
+                    <div class="faq-a">${item.a}</div>
+                </div>
+            `).join("");
+        }
+
+        function submitContactForm(event) {
+            event.preventDefault();
+            const name = document.getElementById("userName").value.trim();
+            const email = document.getElementById("userEmail").value.trim();
+            const phone = document.getElementById("userPhone").value.trim();
+            const comment = document.getElementById("userComment").value.trim();
+            const t = i18n[currentLang];
+
+            const preview = document.getElementById("submittedPreview");
+            preview.innerHTML = `
+                <strong>${t.contactSavedTitle}</strong><br>
+                ${t.labelName.replace("*", "").trim()} <b>${escapeHtml(name)}</b> •
+                ${t.labelEmail.replace("*", "").trim()} <b>${escapeHtml(email)}</b> •
+                ${t.labelPhone.replace("*", "").trim()} <b>${escapeHtml(phone)}</b>
+                ${comment ? `<br><span style="color:var(--text-muted);">${escapeHtml(comment)}</span>` : ""}
+            `;
+            preview.classList.add("show");
+            showToast(t.contactToast);
+        }
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function openPhoneModal(id) {
+            const p = phones.find(item => item.id === id);
+            if (!p) return;
+            const t = i18n[currentLang];
+            document.getElementById("phoneModalContent").innerHTML = `
+                <button class="close-btn" onclick="closeModal('phoneModal')">✕</button>
+                <div class="modal-detail-grid">
+                    <div style="display:flex; justify-content:center;">
+                        <div class="phone-device" style="width:140px; height:270px; border-radius:26px; background:${p.gradient};">
+                            <div class="island"></div>
+                            <div class="device-label" style="font-size:0.85rem;">${p.name}</div>
+                            <div class="home-bar"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card-brand">${p.brand}</div>
+                        <h2 style="font-size:1.8rem; font-weight:900; margin-bottom:0.5rem;">${p.name}</h2>
+                        <p style="color:var(--text-muted); line-height:1.6;">${p.short[currentLang]}</p>
+                        <div class="spec-grid-4">
+                            <div class="spec-box"><small>${t.specDisplay}</small><strong>${p.specs.display}</strong></div>
+                            <div class="spec-box"><small>${t.specChip}</small><strong>${p.specs.chip}</strong></div>
+                            <div class="spec-box"><small>${t.specCamera}</small><strong>${p.specs.camera}</strong></div>
+                            <div class="spec-box"><small>${t.specBattery}</small><strong>${p.specs.battery}</strong></div>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-top:1.2rem;">
+                            <div style="font-size:1.6rem; font-weight:900;">$${p.price}</div>
+                            <button class="btn-primary" onclick="addToCart(${p.id})">🛒 ${t.addToCart}</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById("phoneModal").classList.add("open");
+        }
+
+        function addToCart(id) {
+            const p = phones.find(item => item.id === id);
+            if (!p) return;
+            cart.push(p);
+            document.getElementById("cartCount").textContent = String(cart.length);
+            showToast(i18n[currentLang].addedToast + p.name);
+        }
+
+        function openCart() {
+            const t = i18n[currentLang];
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            const itemsHtml = cart.length
+                ? cart.map((item, idx) => `
+                    <div class="cart-item-row">
+                        <div>
+                            <strong>${item.name}</strong>
+                            <div style="font-size:0.82rem; color:var(--text-muted);">${item.brand}</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.8rem;">
+                            <strong>$${item.price}</strong>
+                            <button class="btn-sm btn-compare-sm" onclick="removeFromCart(${idx})">✕</button>
+                        </div>
+                    </div>
+                `).join("")
+                : `<p style="color:var(--text-muted); margin:1rem 0;">${t.cartEmpty}</p>`;
+
+            document.getElementById("cartModalContent").innerHTML = `
+                <button class="close-btn" onclick="closeModal('cartModal')">✕</button>
+                <h2 style="font-size:1.6rem; font-weight:900; margin-bottom:1.2rem;">${t.cartTitle} (${cart.length})</h2>
+                ${itemsHtml}
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--card-border);">
+                    <span style="font-size:1.1rem; font-weight:700;">${t.totalLabel} <strong style="font-size:1.4rem;">$${total}</strong></span>
+                    ${cart.length ? `<button class="btn-primary" onclick="checkoutCart()">${t.checkoutBtn}</button>` : ""}
+                </div>
+            `;
+            document.getElementById("cartModal").classList.add("open");
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            document.getElementById("cartCount").textContent = String(cart.length);
+            openCart();
+        }
+
+        function checkoutCart() {
+            cart = [];
+            document.getElementById("cartCount").textContent = "0";
+            closeModal("cartModal");
+            showToast(i18n[currentLang].orderToast);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove("open");
+        }
+
+        function closeOnBackdrop(event, id) {
+            if (event.target.id === id) closeModal(id);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById("toast");
+            toast.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2800);
+        }
+
+        /* Частицы на фоне */
+        (function initParticles() {
+            const canvas = document.getElementById("particlesCanvas");
+            const ctx = canvas.getContext("2d");
+            let width = (canvas.width = window.innerWidth);
+            let height = (canvas.height = window.innerHeight);
+
+            window.addEventListener("resize", () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const dots = Array.from({ length: 55 }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                r: Math.random() * 2.2 + 0.8,
+                vx: (Math.random() - 0.5) * 0.45,
+                vy: (Math.random() - 0.5) * 0.45
+            }));
+
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+                const color = getComputedStyle(document.documentElement).getPropertyValue("--particle-color").trim();
+                ctx.fillStyle = color;
+                for (const d of dots) {
+                    d.x += d.vx;
+                    d.y += d.vy;
+                    if (d.x < 0) d.x = width;
+                    if (d.x > width) d.x = 0;
+                    if (d.y < 0) d.y = height;
+                    if (d.y > height) d.y = 0;
+                    ctx.beginPath();
+                    ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+
+        initCompareSelectors();
+        setLang("ru");
+    </script>
+</body>
+</html>
